@@ -1,0 +1,21 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test output & logs
+tests/logs/
+*.log
+/tmp/
+
+# Local config overrides 
+*.local.sh
+
+# SSH keys
+/lg-id_rsa
+/lg-id_rsa.pub
