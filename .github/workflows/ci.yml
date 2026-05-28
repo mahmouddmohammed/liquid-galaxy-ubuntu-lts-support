@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ─────────────────────────────────────────────
+  # JOB 1 : Syntax check 
+  # ─────────────────────────────────────────────
+  syntax-check:
+    name: Bash Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check syntax of all shell scripts
+        run: bash tests/syntax-check.sh
+
+  # ─────────────────────────────────────────────
+  # JOB 2 : ShellCheck static analysis
+  # ─────────────────────────────────────────────
+  shellcheck:
+    name: ShellCheck Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on all scripts
+        run: bash tests/shellcheck.sh 0
+
+ 
