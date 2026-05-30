@@ -14,3 +14,25 @@ get_display_manager(){
 get_desktop_environment(){
     echo "$XDG_CURRENT_DESKTOP"
 }
+
+
+# Configuring GDM3 autologin
+configure_autologin() {
+    
+    local LOCAL_USER="$1"
+    sudo tee /etc/gdm3/custom.conf > /dev/null << EOM
+[daemon]
+AutomaticLoginEnable=true
+AutomaticLogin=$LOCAL_USER
+
+
+[security]
+
+[xdmcp]
+
+[chooser]
+
+[debug]
+EOM
+}
+
