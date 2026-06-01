@@ -28,10 +28,161 @@ Press Ctrl+C now to abort.
 -------------------------------------------------------------
 EOM
 
-# load all lib scripts 
-source lib/compat.sh
-source lib/network.sh
-#source lib/packages.sh
+
+IS_MASTER=false   # boolean flag 
+# It will be needed for slaves
+MASTER_IP=""
+MASTER_PASSWORD=""
+
+USER_IP=""
+USER_PASSWORD=""
+USER_USERNAME=$USER
+USER_HOME_DIR=$HOME
+
+MACHINE_ID="1"
+MACHINE_NAME="lg"$MACHINE_ID
+TOTAL_MACHINES="3"
+
+LG_FRAMES="lg3 lg1 lg2"
+OCTET="42"
+SCREEN_ORIENTATION="V"
+
+GIT_DIR_NAME="ubuntu-lts-support-gsoc2026"
+GITHUB_REPO_URL="https://github.com/LiquidGalaxyLAB/ubuntu-lts-support-gsoc2026"
+
+GOOGLE_EARTH_DIR="/opt/google/earth/pro/"
 
 
-apt-get update -y && apt-get upgrade -y
+load_script(){
+  source lib/compat.sh
+  source lib/network.sh
+  source lib/display.sh
+  source lib/desktop.sh
+  USER_IP=$NODE_IP
+}
+
+read_machine_id(){
+  while true; do
+      read -p "Machine id (i.e. 1 for lg1) (1 == master): " MACHINE_ID
+
+      if [ "$(echo $MACHINE_ID | cut -c-2)" == "lg" ]; then
+          MACHINE_ID="$(echo $MACHINE_ID | cut -c3-)"
+      fi
+
+      # check it's a number
+      if [[ "$MACHINE_ID" =~ ^[0-9]+$ ]]; then
+          break
+      fi
+
+      echo "Invalid input. Please enter a number."
+  done
+  MACHINE_NAME="lg$MACHINE_ID"
+}
+
+print_configuration(){
+  cat << EOM
+
+Liquid Galaxy will be installed with the following configuration:
+
+IS THIS MACHINE THE MASTER: $IS_MASTER
+
+LOCAL_USER: $USER_USERNAME
+
+MACHINE_ID: $MACHINE_ID
+
+MACHINE_NAME: $MACHINE_NAME 
+
+TOTAL_MACHINES: $TOTAL_MACHINES
+
+OCTET (UNIQUE NUMBER): $OCTET
+
+GITHUB_REPO_URL: $GITHUB_REPO_URL
+
+Repo folder name: $GIT_DIR_NAME
+
+EARTH_FOLDER: $GOOGLE_EARTH_DIR
+
+NETWORK_INTERFACE: $NETWORK_INTERFACE
+
+NETWORK_MAC_ADDRESS: $NETWORK_INTERFACE_MAC
+
+Is it correct? Press any key to continue or CTRL-C to exit
+
+EOM
+
+  read
+}
+
+
+main(){
+
+  # user need to run the script with sudo privilige as I didn't write sudo below
+  if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root: sudo bash $0"
+    exit 1
+  fi
+
+  # to to exit immediately if a command returns a non-zero exit status, instead of continuing to execute the rest of the script
+  set -euo pipefail
+
+  # clone the repo, if there is already the dir I will clone again because I don't know it's corrupted or not without checking the hash so i simply overwrite
+  cd ~ 
+  git clone "$GITHUB_REPO_URL"
+  cd "$GIT_DIR_NAME"
+
+  # load all lib scripts 
+  load_script
+
+  # first check it's compatibile or not 
+  bash precheck.sh
+
+
+  read_machine_id
+  if [ $MACHINE_ID == "1" ]; then
+    IS_MASTER=true
+    echo "Save the IP ADDRESS of this machine: $USER_IP"
+    read -p "Press any key to continue"
+  else
+
+    echo "Make sure Master machine (lg1) is connected to the network before proceding!"
+    read -p "Master machine IP (i.e. 192.168.1.42): " MASTER_IP
+    read -p "Master local user password (i.e. lg password): " MASTER_PASSWORD
+
+  fi
+
+  read -p "Total machines count (i.e. 3): " TOTAL_MACHINES
+
+  read -p "Unique number that identifies your Galaxy (octet) (i.e. 42): " OCTET
+  
+  mid=$((TOTAL_MACHINES / 2))
+  array=()
+  for j in `seq $((mid + 2)) $TOTAL_MACHINES`;
+  do
+      array+=("lg"$j)
+  done
+
+  for j in `seq 1 $((mid+1))`;
+  do
+      array+=("lg"$j)
+  done
+  echo "${array[@]}"
+
+
+  print_configuration
+
+  export DEBIAN_FRONTEND=noninteractive
+
+  echo ">>> Installing Needed Packages..."
+  bash lib/packages.sh
+  
+  echo ">>> Configuring autologin..."
+  configure_autologin "$USER_USERNAME"
+
+  echo ">>> Configuring desktop settings..."
+  configure_desktop_settings
+  
+  echo ">>> Installing Google Earth..."
+  bash "lib/google_earth.sh"
+
+
+}
