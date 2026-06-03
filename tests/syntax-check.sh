@@ -15,7 +15,7 @@ while IFS= read -r -d '' file; do
   else
     echo "OK: $file"
   fi
-done < <(find . -name "*.sh" -not -path "./.git/*" -print0)
+done < <(find .. -name "*.sh" -not -path "./.git/*" -print0)
 
 echo ""
 
