@@ -47,7 +47,7 @@ LG_FRAMES="lg3 lg1 lg2"
 OCTET="42"
 SCREEN_ORIENTATION="V"
 
-GIT_DIR_NAME="ubuntu-lts-support-gsoc2026"
+GITHUB_REPO_NAME="ubuntu-lts-support-gsoc2026"
 GITHUB_REPO_URL="https://github.com/LiquidGalaxyLAB/ubuntu-lts-support-gsoc2026"
 
 GOOGLE_EARTH_DIR="/opt/google/earth/pro/"
@@ -98,7 +98,7 @@ OCTET (UNIQUE NUMBER): $OCTET
 
 GITHUB_REPO_URL: $GITHUB_REPO_URL
 
-Repo folder name: $GIT_DIR_NAME
+Repo folder name: $GITHUB_REPO_NAME
 
 EARTH_FOLDER: $GOOGLE_EARTH_DIR
 
@@ -123,6 +123,29 @@ configure_chromium(){
   apt-get remove --purge -yq update-notifier*
 }
 
+setup_liquid_galaxy(){
+  # I'm in ~/ubuntu-lts-support-gsoc2026
+  cp -r earth ~
+  sudo cp -r gnu_linux/home/lg/. ~   # copy all files in gnu_linux/home/lg/ to user home directory
+  ln -s $GOOGLE_EARTH_DIR $HOME/earth/builds/latest
+  awk '/LD_LIBRARY_PATH/{print "export LC_NUMERIC=en_US.UTF-8"}1' ~/earth/builds/latest/googleearth | sudo tee ~/earth/builds/latest/googleearth > /dev/null
+
+  if [ $MASTER == false ]; then
+    sudo sed -i -e 's/slave_x/slave_'${MACHINE_ID}'/g' ~/earth/kml/slave/myplaces.kml
+    sudo sed -i -e 's/sync_nlc_x/sync_nlc_'${MACHINE_ID}'/g' ~/earth/kml/slave/myplaces.kml
+  fi
+
+  # make these files hidden
+  for file in ~/dotfiles/*; do
+    filename=$(basename "$file")
+    sudo mv "$file" ~/dotfiles/."$filename"
+  done
+
+
+  
+}
+
+
 main(){
 
   # user need to run the script with sudo privilige as I didn't write sudo below
@@ -137,7 +160,7 @@ main(){
   # clone the repo, if there is already the dir I will clone again because I don't know it's corrupted or not without checking the hash so i simply overwrite
   cd ~ 
   git clone "$GITHUB_REPO_URL"
-  cd "$GIT_DIR_NAME"
+  cd "$GITHUB_REPO_NAME"
 
   # load all lib scripts 
   load_script
@@ -194,5 +217,8 @@ main(){
   bash "lib/google_earth.sh"
 
   configure_chromium
+
+
+  # apt upgrade -f # to fix any dependecies packages issue because that will install dependencies packages
 
 }
