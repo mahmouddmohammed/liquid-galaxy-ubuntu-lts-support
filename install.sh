@@ -114,6 +114,15 @@ EOM
 }
 
 
+configure_chromium(){
+  # I need to register it in database to be able to set it 
+  update-alternatives --install /usr/bin/x-www-browser x-www-browser /snap/bin/chromium 60
+  update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser /snap/bin/chromium 60
+  update-alternatives --set x-www-browser /snap/bin/chromium
+  update-alternatives --set gnome-www-browser /snap/bin/chromium
+  apt-get remove --purge -yq update-notifier*
+}
+
 main(){
 
   # user need to run the script with sudo privilige as I didn't write sudo below
@@ -184,5 +193,6 @@ main(){
   echo ">>> Installing Google Earth..."
   bash "lib/google_earth.sh"
 
+  configure_chromium
 
 }
