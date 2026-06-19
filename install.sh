@@ -141,6 +141,9 @@ setup_liquid_galaxy(){
     sudo mv "$file" ~/dotfiles/."$filename"
   done
 
+  cp gnu_linux/etc/lg-liquid-galaxy-dispatcher.sh /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
+  chmod 755 /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
+  chown root:root /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
 
   
 }
