@@ -145,6 +145,10 @@ setup_liquid_galaxy(){
   chmod 755 /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
   chown root:root /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
 
+
+
+  systemctl enable galaxy.service
+
   
 }
 
