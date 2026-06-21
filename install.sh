@@ -123,6 +123,19 @@ configure_chromium(){
   apt-get remove --purge -yq update-notifier*
 }
 
+# Create lg user if not exist 
+check_lg_user(){
+  username=$(cat /etc/passwd | cut -d : -f 1 | grep -w "lg")
+  if [[ -z "$username" ]]; then 
+    create_lg_user
+  fi 
+
+}
+
+create_lg_user(){
+  useradd lg -m -c "User for Liquid Galaxy System" -p "" 
+}
+
 setup_liquid_galaxy(){
   # I'm in ~/ubuntu-lts-support-gsoc2026
   cp -r earth ~
