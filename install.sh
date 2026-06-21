@@ -168,6 +168,13 @@ EOF
 Session=openbox
 EOF
   chown lg:lg /home/lg/.dmrc
+
+
+  mkdir -p /home/lg/.config/openbox
+  touch /home/lg/.config/openbox/autostart
+  chown -R lg:lg /home/lg/.config/openbox
+  chmod 755 /home/lg/.config/openbox
+  chmod 644 /home/lg/.config/openbox/autostart
   
   reboot
 
@@ -177,6 +184,12 @@ EOF
   else 
     echo "failed"
   fi 
+
+}
+
+configure_unclutter(){
+
+  echo "unclutter --idle 7 --jitter 6 --root &" > ~/.config/openbox/autostart 
 
 }
 
