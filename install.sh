@@ -136,6 +136,50 @@ create_lg_user(){
   useradd lg -m -c "User for Liquid Galaxy System" -p "" 
 }
 
+setup_display_desktop(){
+  # Setup lightdm (Display Manager)
+  apt install -y lightdm
+
+  # Setup Window manager 
+  apt install -y openbox
+
+  # disable current display manager (gdm3) and enable lightdm
+  systemctl disable gdm3
+  systemctl enable lightdm
+
+  # Set LightDM as the default display manager
+  echo "/usr/sbin/lightdm" > /etc/X11/default-display-manager
+
+    # Configure LightDM: autologin as lg, use openbox session
+  cat > /etc/lightdm/lightdm.conf << 'EOF'
+# /etc/lightdm/lightdm.conf - Liquid Galaxy display configuration
+[LightDM]
+
+[Seat:*]
+user-session=openbox
+autologin-user=lg
+autologin-user-timeout=0
+autologin-session=openbox
+EOF
+
+  # Set lg user session preference
+  cat > /home/lg/.dmrc << 'EOF'
+[Desktop]
+Session=openbox
+EOF
+  chown lg:lg /home/lg/.dmrc
+  
+  reboot
+
+  # check display server:x11 and display manager: lightdm and window manager: openbox
+  if [[ "$XDG_SESSION_TYPE" == "x11" && "$XDG_SESSION_DESKTOP" == "openbox" && -z "$(cat /etc/X11/default-display-manager | grep "lightdm")" ]]; then 
+    echo "passed"
+  else 
+    echo "failed"
+  fi 
+
+}
+
 setup_liquid_galaxy(){
   # I'm in ~/ubuntu-lts-support-gsoc2026
   cp -r earth ~
