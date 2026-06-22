@@ -7,4 +7,4 @@ apt-get install -y git bzip2 tar gcc make perl ca-certificates curl gpg xdg-util
                    unclutter-xfixes \
                    snmpd \
                    nftables \
-                   librsvg2-bin imagemagick bc \
+                   librsvg2-bin imagemagick bc equivs\
