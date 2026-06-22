@@ -6,4 +6,5 @@ apt-get install -y git bzip2 tar gcc make perl ca-certificates curl gpg xdg-util
                    xdotool wmctrl x11-utils \
                    unclutter-xfixes \
                    snmpd \
-                   nftables
+                   nftables \
+                   librsvg2-bin imagemagick bc \
