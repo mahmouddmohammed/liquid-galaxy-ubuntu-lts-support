@@ -218,7 +218,8 @@ setup_liquid_galaxy(){
 
 
   systemctl enable galaxy.service
-
+  systemctl enable nftables
+  systemctl start nftables
   
 }
 
