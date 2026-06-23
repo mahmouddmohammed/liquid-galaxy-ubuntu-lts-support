@@ -220,6 +220,10 @@ setup_liquid_galaxy(){
   systemctl enable galaxy.service
   systemctl enable nftables
   systemctl start nftables
+
+
+  sed -i 's/rights="none" pattern="GIF"/rights="read|write" pattern="GIF"/' \
+    /etc/ImageMagick-6/policy.xml
   
 }
 
