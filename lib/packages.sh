@@ -10,4 +10,5 @@ apt-get install -y git bzip2 tar gcc make perl ca-certificates curl gpg xdg-util
                    librsvg2-bin imagemagick bc equivs screen \
                    python3-evdev tk mplayer sshpass imagemagick x11-apps caca-utils \
                    tcpdump \
-                   isc-dhcp-client
+                   isc-dhcp-client \
+                   gcc openssh-server \
