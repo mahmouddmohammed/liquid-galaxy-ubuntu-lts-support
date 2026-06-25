@@ -236,11 +236,7 @@ setup_liquid_galaxy(){
 
 main(){
 
-  # user need to run the script with sudo privilige as I didn't write sudo below
-  if [ $EUID -eq 0 ]; then
-    echo "Do not run it as root!" 1>&2
-    exit 1
-  fi
+  bash precheck.sh
 
   # to to exit immediately if a command returns a non-zero exit status, instead of continuing to execute the rest of the script
   #set -euo pipefail
