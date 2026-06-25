@@ -32,13 +32,13 @@ EOM
 # GLOBAL VARIABLES
 # =============================================================================
 
-IS_MASTER=false   # boolean flag 
 # It will be needed for slaves
+IS_MASTER=false   # boolean flag 
 MASTER_IP=""
 MASTER_PASSWORD=""
 
 LG_USER="lg"
-LG_HOME="$(getent passwd "$LG_USER" | cut -d: -f6)" # most probably /home/lg if not customized by user
+LG_HOME="/home/lg"
 
 USER_IP=""
 USER_PASSWORD=""
@@ -59,14 +59,22 @@ GITHUB_REPO_URL="https://github.com/LiquidGalaxyLAB/ubuntu-lts-support-gsoc2026"
 GOOGLE_EARTH_DIR="/opt/google/earth/pro/"
 
 
+# =============================================================================
+# LOAD LIBRARY SCRIPTS
+# =============================================================================
+ 
 load_script(){
   source lib/compat.sh
   source lib/network.sh
   source lib/display.sh
   source lib/desktop.sh
-  USER_IP=$NODE_IP
+  USER_IP="$NODE_IP"
 }
 
+# =============================================================================
+# READ MACHINE ID
+# =============================================================================
+ 
 read_machine_id(){
   while true; do
       read -p "Machine id (i.e. 1 for lg1) (1 == master): " MACHINE_ID
@@ -85,32 +93,28 @@ read_machine_id(){
   MACHINE_NAME="lg$MACHINE_ID"
 }
 
+# =============================================================================
+# PRINT CONFIGURATION SUMMARY
+# =============================================================================
+ 
+
 print_configuration(){
   cat << EOM
 
 Liquid Galaxy will be installed with the following configuration:
 
-IS THIS MACHINE THE MASTER: $IS_MASTER
-
-LOCAL_USER: $USER_USERNAME
-
-MACHINE_ID: $MACHINE_ID
-
-MACHINE_NAME: $MACHINE_NAME 
-
-TOTAL_MACHINES: $TOTAL_MACHINES
-
-OCTET (UNIQUE NUMBER): $OCTET
-
-GITHUB_REPO_URL: $GITHUB_REPO_URL
-
-Repo folder name: $GITHUB_REPO_NAME
-
-EARTH_FOLDER: $GOOGLE_EARTH_DIR
-
-NETWORK_INTERFACE: $NETWORK_INTERFACE
-
-NETWORK_MAC_ADDRESS: $NETWORK_INTERFACE_MAC
+IS THIS MACHINE THE MASTER : $IS_MASTER
+LOCAL_USER                 : $USER_USERNAME
+USER_HOME_DIR              : $USER_HOME_DIR
+MACHINE_ID                 : $MACHINE_ID
+MACHINE_NAME               : $MACHINE_NAME
+TOTAL_MACHINES             : $TOTAL_MACHINES
+LG_FRAMES                  : $LG_FRAMES
+OCTET (UNIQUE NUMBER)      : $OCTET
+GITHUB_REPO_URL            : $GITHUB_REPO_URL
+EARTH_FOLDER               : $GOOGLE_EARTH_DIR
+NETWORK_INTERFACE          : $NETWORK_INTERFACE
+NETWORK_MAC_ADDRESS        : $NETWORK_INTERFACE_MAC
 
 Is it correct? Press any key to continue or CTRL-C to exit
 
@@ -119,45 +123,53 @@ EOM
   read
 }
 
+# =============================================================================
+# USER MANAGEMENT
+# NOT USED YET
+# =============================================================================
+ 
+check_lg_user() {
+    local username
+    username=$(cut -d: -f1 /etc/passwd | grep -w "lg" || true)
+    if [[ -z "$username" ]]; then
+        echo ">>> Creating lg user..."
+        create_lg_user
+    else
+        echo ">>> lg user already exists, SWITCH"
+    fi
+}
+ 
+create_lg_user() {
+    sudo useradd lg -m -s /bin/bash -c "Liquid Galaxy System User"
+}
 
+# =============================================================================
+# CHROMIUM CONFIGURATION
+# =============================================================================
 configure_chromium(){
   # I need to register it in database to be able to set it 
-  update-alternatives --install /usr/bin/x-www-browser x-www-browser /snap/bin/chromium 60
-  update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser /snap/bin/chromium 60
-  update-alternatives --set x-www-browser /snap/bin/chromium
-  update-alternatives --set gnome-www-browser /snap/bin/chromium
-  apt-get remove --purge -yq update-notifier*
+  sudo update-alternatives --install /usr/bin/x-www-browser x-www-browser /snap/bin/chromium 60
+  sudo update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser /snap/bin/chromium 60
+  sudo update-alternatives --set x-www-browser /snap/bin/chromium
+  sudo update-alternatives --set gnome-www-browser /snap/bin/chromium
+  sudo apt-get remove --purge -yq update-notifier*
 }
 
-# Create lg user if not exist 
-check_lg_user(){
-  username=$(cat /etc/passwd | cut -d : -f 1 | grep -w "lg")
-  if [[ -z "$username" ]]; then 
-    create_lg_user
-  fi 
-
-}
-
-create_lg_user(){
-  useradd lg -m -c "User for Liquid Galaxy System" -p "" 
-}
 
 setup_display_desktop(){
-  # Setup lightdm (Display Manager)
-  apt install -y lightdm
 
-  # Setup Window manager 
-  apt install -y openbox
+  # Install display manager(lightdm) and window manager(openbox)
+  sudo apt install -y lightdm openbox unclutter-xfixes feh
 
   # disable current display manager (gdm3) and enable lightdm
-  systemctl disable gdm3
-  systemctl enable lightdm
+  sudo systemctl disable gdm3 || true
+  sudo systemctl enable lightdm || true
 
   # Set LightDM as the default display manager
-  echo "/usr/sbin/lightdm" > /etc/X11/default-display-manager
+  echo "/usr/sbin/lightdm" | sudo tee /etc/X11/default-display-manager > /dev/null
 
-    # Configure LightDM: autologin as lg, use openbox session
-  cat > /etc/lightdm/lightdm.conf << 'EOF'
+  # Configure LightDM: autologin as lg, use openbox X11 session
+  sudo tee /etc/lightdm/lightdm.conf > /dev/null << 'EOF'
 # /etc/lightdm/lightdm.conf - Liquid Galaxy display configuration
 [LightDM]
 
@@ -169,102 +181,162 @@ autologin-session=openbox
 EOF
 
   # Set lg user session preference
-  cat > /home/lg/.dmrc << 'EOF'
+  cat > $LG_HOME/.dmrc << 'EOF'
 [Desktop]
 Session=openbox
 EOF
-  chown lg:lg /home/lg/.dmrc
-
-
-  mkdir -p /home/lg/.config/openbox
-  touch /home/lg/.config/openbox/autostart
-  chown -R lg:lg /home/lg/.config/openbox
-  chmod 755 /home/lg/.config/openbox
-  chmod 644 /home/lg/.config/openbox/autostart
+  sudo chown lg:lg $LG_HOME/.dmrc            
   
+
+  mkdir -p $LG_HOME/.config/openbox
+  chmod 755 $LG_HOME/.config/openbox
+  touch $LG_HOME/.config/openbox/autostart
+  
+
+  cat > $LG_HOME/.config/openbox/autostart << 'EOF'
+# Liquid Galaxy Openbox autostart
+# Runs as lg user every time Openbox starts
+ 
+# Load X resources
+xrdb -merge ~/.Xresources &
+ 
+# Hide cursor when idle
+unclutter --idle 7 --jitter 6 --root &
+ 
+# Compositor - prevents screen tearing, enables shadows
+picom --daemon &
+ 
+# Set blue background (no wallpaper on display nodes)
+feh --bg-solid "#0000FF" &
+ 
+EOF
+
+  sudo chown -R lg:lg $LG_HOME/.config/openbox
+  chmod 644 $LG_HOME/.config/openbox/autostart
+  
+  # Install picom compositor for modern window rendering
+  sudo apt install -y picom
+
+  # Create GTK theme configuration so apps look modern
+  mkdir -p $LG_HOME/.config/gtk-3.0
+  mkdir -p $LG_HOME/.config/gtk-4.0
+ 
+  cat > $LG_HOME/.config/gtk-3.0/settings.ini << 'EOF'
+[Settings]
+gtk-theme-name=Yaru
+gtk-icon-theme-name=Yaru
+gtk-font-name=Ubuntu 11
+gtk-cursor-theme-name=Yaru
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintfull
+EOF
+ 
+  cat > $LG_HOME/.config/gtk-4.0/settings.ini << 'EOF'
+[Settings]
+gtk-theme-name=Yaru
+gtk-icon-theme-name=Yaru
+gtk-font-name=Ubuntu 11
+gtk-cursor-theme-name=Yaru
+EOF
+ 
+  chown -R lg:lg $LG_HOME/.config/gtk-3.0
+  chown -R lg:lg $LG_HOME/.config/gtk-4.0
+
+  # run installation phase two automatically after reboot
+  register_phase2
+
+  echo ">>> Display setup DONE. Rebooting in 5 seconds..."
+  sleep 5
   reboot
-
-  # check display server:x11 and display manager: lightdm and window manager: openbox
-  if [[ "$XDG_SESSION_TYPE" == "x11" && "$XDG_SESSION_DESKTOP" == "openbox" && -z "$(cat /etc/X11/default-display-manager | grep "lightdm")" ]]; then 
-    echo "passed"
-  else 
-    echo "failed"
-  fi 
-
 }
 
-configure_unclutter(){
 
-  echo "unclutter --idle 7 --jitter 6 --root &" > ~/.config/openbox/autostart 
+register_phase2(){
 
+  # Save all variables needed by phase 2 to a state file
+  STATE_FILE="/etc/lg-install-state.env"  
+  sudo tee "$STATE_FILE" > /dev/null << EOF
+IS_MASTER=$IS_MASTER
+MASTER_IP=$MASTER_IP
+MASTER_PASSWORD=$MASTER_PASSWORD
+USER_USERNAME=$USER_USERNAME
+USER_HOME_DIR=$USER_HOME_DIR
+MACHINE_ID=$MACHINE_ID
+MACHINE_NAME=$MACHINE_NAME
+TOTAL_MACHINES=$TOTAL_MACHINES
+LG_FRAMES="${LG_FRAMES}"
+OCTET=$OCTET
+GITHUB_REPO_NAME=$GITHUB_REPO_NAME
+GITHUB_REPO_URL=$GITHUB_REPO_URL
+GOOGLE_EARTH_DIR=$GOOGLE_EARTH_DIR
+NETWORK_INTERFACE=${NETWORK_INTERFACE:-}
+NETWORK_INTERFACE_MAC=${NETWORK_INTERFACE_MAC:-}
+EOF
+  sudo chmod 600 "$STATE_FILE"
+
+
+  # Register as systemd one-shot that runs after display manager starts
+  sudo tee /etc/systemd/system/lg-install-phase2.service > /dev/null << EOF
+[Unit]
+Description=Liquid Galaxy Installation Phase 2 (runs once after reboot)
+After=lightdm.service graphical.target network-online.target
+Wants=graphical.target network-online.target
+ 
+[Service]
+Type=oneshot
+EnvironmentFile=$STATE_FILE    
+ExecStart=$LG_HOME/$GITHUB_REPO_NAME/install-phase-two.sh
+User=lg
+ExecStartPost=/bin/rm -f $STATE_FILE  
+ExecStartPost=/bin/systemctl disable lg-install-phase2.service
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=600
+RemainAfterExit=no
+ 
+[Install]
+WantedBy=graphical.target
+EOF
+ 
+  sudo systemctl daemon-reload
+  sudo systemctl enable lg-install-phase2.service
+  echo ">>> Phase 2 registered - will run automatically after reboot"
 }
 
-setup_liquid_galaxy(){
-  # I'm in ~/ubuntu-lts-support-gsoc2026
-  cp -r earth ~
-  sudo cp -r gnu_linux/home/lg/. ~   # copy all files in gnu_linux/home/lg/ to user home directory
-  ln -s $GOOGLE_EARTH_DIR $HOME/earth/builds/latest
-  awk '/LD_LIBRARY_PATH/{print "export LC_NUMERIC=en_US.UTF-8"}1' ~/earth/builds/latest/googleearth | sudo tee ~/earth/builds/latest/googleearth > /dev/null
-
-  if [ $MASTER == false ]; then
-    sudo sed -i -e 's/slave_x/slave_'${MACHINE_ID}'/g' ~/earth/kml/slave/myplaces.kml
-    sudo sed -i -e 's/sync_nlc_x/sync_nlc_'${MACHINE_ID}'/g' ~/earth/kml/slave/myplaces.kml
-  fi
-
-  # make these files hidden
-  for file in ~/dotfiles/*; do
-    filename=$(basename "$file")
-    sudo mv "$file" ~/dotfiles/."$filename"
-  done
-
-  cp gnu_linux/etc/lg-liquid-galaxy-dispatcher.sh /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
-  chmod 755 /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
-  chown root:root /etc/NetworkManager/dispatcher.d/99-liquid-galaxy
-
-
-
-  systemctl enable galaxy.service
-  systemctl enable nftables
-  systemctl start nftables
-
-
-  sed -i 's/rights="none" pattern="GIF"/rights="read|write" pattern="GIF"/' \
-    /etc/ImageMagick-6/policy.xml
-  
-}
 
 
 main(){
 
-  bash precheck.sh
-
-  # to to exit immediately if a command returns a non-zero exit status, instead of continuing to execute the rest of the script
-  #set -euo pipefail
-
   # clone the repo, if there is already the dir I will clone again because I don't know it's corrupted or not without checking the hash so i simply overwrite
   cd ~ 
-  rm -rf "$GITHUB_REPO_NAME"
+  rm -rf "$GITHUB_REPO_NAME" || true
   git clone "$GITHUB_REPO_URL"
   cd "$GITHUB_REPO_NAME"
 
-  # load all lib scripts 
-  load_script
+  # to to exit immediately if a command returns a non-zero exit status, instead of continuing to execute the rest of the script
+  set -euo pipefail 
 
   # first check it's compatibile or not 
   bash precheck.sh
 
+  # load all lib scripts 
+  load_script
 
+  # Get machine ID from user
   read_machine_id
-  if [ $MACHINE_ID == "1" ]; then
+
+  if [ "$MACHINE_ID" == "1" ]; then
     IS_MASTER=true
+    echo ">>> This machine is the MASTER (lg1)"
     echo "Save the IP ADDRESS of this machine: $USER_IP"
     read -p "Press any key to continue"
   else
-
+    echo ">>> This machine is a SLAVE"
     echo "Make sure Master machine (lg1) is connected to the network before proceding!"
     read -p "Master machine IP (i.e. 192.168.1.42): " MASTER_IP
-    read -p "Master local user password (i.e. lg password): " MASTER_PASSWORD
-
+    read -s -p "Master local user password: " MASTER_PASSWORD
+    echo
   fi
 
   read -p "Total machines count (i.e. 3): " TOTAL_MACHINES
@@ -282,6 +354,7 @@ main(){
   do
       array+=("lg"$j)
   done
+  LG_FRAMES="${array[*]}"
   echo "${array[@]}"
 
 
@@ -291,19 +364,13 @@ main(){
 
   echo ">>> Installing Needed Packages..."
   bash lib/packages.sh
-  
-  echo ">>> Configuring autologin..."
-  configure_autologin "$USER_USERNAME"
 
-  echo ">>> Configuring desktop settings..."
-  configure_desktop_settings
-  
   echo ">>> Installing Google Earth..."
-  bash "lib/google_earth.sh"
+  bash lib/google_earth.sh
 
   configure_chromium
-
-
-  # apt upgrade -f # to fix any dependecies packages issue because that will install dependencies packages
-
+  
+  echo ">>> Configuring desktop settings..."
+  setup_display_desktop
+  
 }
