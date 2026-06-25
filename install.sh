@@ -22,17 +22,23 @@ Supported systems:
   • Ubuntu 26.04 LTS (64-bit)
 
 Run as:
-  • sudo ./install.sh
+  • ./install.sh
 
 Press Ctrl+C now to abort.
 -------------------------------------------------------------
 EOM
 
+# =============================================================================
+# GLOBAL VARIABLES
+# =============================================================================
 
 IS_MASTER=false   # boolean flag 
 # It will be needed for slaves
 MASTER_IP=""
 MASTER_PASSWORD=""
+
+LG_USER="lg"
+LG_HOME="$(getent passwd "$LG_USER" | cut -d: -f6)" # most probably /home/lg if not customized by user
 
 USER_IP=""
 USER_PASSWORD=""
@@ -231,16 +237,17 @@ setup_liquid_galaxy(){
 main(){
 
   # user need to run the script with sudo privilige as I didn't write sudo below
-  if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root: sudo bash $0"
+  if [ $EUID -eq 0 ]; then
+    echo "Do not run it as root!" 1>&2
     exit 1
   fi
 
   # to to exit immediately if a command returns a non-zero exit status, instead of continuing to execute the rest of the script
-  set -euo pipefail
+  #set -euo pipefail
 
   # clone the repo, if there is already the dir I will clone again because I don't know it's corrupted or not without checking the hash so i simply overwrite
   cd ~ 
+  rm -rf "$GITHUB_REPO_NAME"
   git clone "$GITHUB_REPO_URL"
   cd "$GITHUB_REPO_NAME"
 

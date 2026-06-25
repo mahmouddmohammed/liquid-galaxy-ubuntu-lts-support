@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# That's for gnome desktop environment
+# But now we don't use gnome anymore
+
 # Disabling screensaver and lock screen
 configure_screensaver() {
     gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
