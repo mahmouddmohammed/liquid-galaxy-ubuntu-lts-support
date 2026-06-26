@@ -372,3 +372,5 @@ main(){
   setup_display_desktop
   
 }
+
+main 
