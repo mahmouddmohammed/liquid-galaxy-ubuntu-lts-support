@@ -4,6 +4,10 @@
 # Runs as the calling user (NOT root)
 # Requires sudo for system file operations
 
+source /etc/lg-install-state.env
+LG_USER="lg"
+LG_HOME="/home/lg"
+
 configure_ssh() {
     
     if [ "$IS_MASTER" = "true" ]; then
@@ -77,3 +81,5 @@ configure_ssh() {
 
     #echo ">>> SSH configuration complete"
 }
+
+configure_ssh
