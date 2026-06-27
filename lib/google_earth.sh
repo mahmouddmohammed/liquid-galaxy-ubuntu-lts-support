@@ -31,5 +31,8 @@ EOF
 sudo rm -f /etc/apt/sources.list.d/google-earth-pro.list \
            /etc/apt/trusted.gpg.d/google-earth-pro.gpg
 
+# Refresh package lists
+sudo apt update
+
 # 6. Install
 sudo apt install -y google-earth-pro-stable
