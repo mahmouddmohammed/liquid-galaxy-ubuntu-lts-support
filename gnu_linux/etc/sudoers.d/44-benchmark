@@ -3,8 +3,8 @@ www-data ALL=(lg) NOPASSWD: /home/lg/bin/lg-sudo
 www-data ALL=(lg) NOPASSWD: /home/lg/bin/lg-relaunch
 
 # Scripts
-www-data ALL=(lg) NOPASSWD: /usr/bin/cp /home/lg/Charts/* /var/www/benchmarking/img
-lg ALL=(ALL) NOPASSWD: /usr/bin/cp /home/lg/Charts/* /var/www/benchmarking/img
+www-data ALL=(lg) NOPASSWD: /home/lg/bin/copy-charts.sh
+lg ALL=(ALL) NOPASSWD: /home/lg/bin/copy-charts.sh
 www-data ALL=(lg) NOPASSWD: /home/lg/LG_Benchmarking/Chart-gen/getCharts.sh
 www-data ALL=(lg) NOPASSWD: /home/lg/LG_Benchmarking/Scripts/Analize.sh
 www-data ALL=(lg) NOPASSWD: /home/lg/LG_Benchmarking/Scripts/CopyData.sh

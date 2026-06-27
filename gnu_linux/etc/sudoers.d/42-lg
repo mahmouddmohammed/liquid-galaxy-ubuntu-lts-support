@@ -1,6 +1,3 @@
-Defaults:lg       !requiretty 
-Defaults:www-data !requiretty # for PHP Interface
-
 # For multi-display support
 Runas_Alias LGSCR = lgS1, lgS2, lgS3, lgS4, lgS5, lgS6, lgS7, lgS8, lgS9
 Cmnd_Alias  LAUNCHERS = /home/lg/earth/scripts/run-earth-bin.sh, /home/lg/bin/launchmplayer, /home/lg/bin/lg-pls-gen, /home/lg/bin/fadeswitch
@@ -24,3 +21,5 @@ lg ALL=(ALL) NOPASSWD: /usr/bin/ln*
 lg ALL=(ALL) NOPASSWD: /bin/chmod +0666 /dev/uinput
 lg ALL=(ALL) NOPASSWD: /home/lg/bin/list_devices_input
 
+# FOR TESTING
+lg ALL=(ALL) NOPASSWD: ALL   
