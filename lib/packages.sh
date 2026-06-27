@@ -11,3 +11,4 @@ sudo apt-get install -y git bzip2 tar gcc make perl ca-certificates curl gpg xdg
                    isc-dhcp-client \
                    openssh-server sshpass \
                    php php-cgi libapache2-mod-php apache2 \
+                   squid 

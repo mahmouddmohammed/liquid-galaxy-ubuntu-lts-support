@@ -252,6 +252,7 @@ su - lg -c "$REPO_DIR/lib/ssh.sh"
 # =============================================================================
  
 echo " Enabling galaxy.service (race breaker)..."
+chmod +x /usr/local/sbin/galaxy-race-breaker.sh
 systemctl enable galaxy.service 2>/dev/null || \
     echo " WARNING: galaxy.service not found - install manually"
  

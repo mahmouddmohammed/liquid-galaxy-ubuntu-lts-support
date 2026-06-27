@@ -312,6 +312,10 @@ main(){
   git clone "$GITHUB_REPO_URL"
   cd "$GITHUB_REPO_NAME"
 
+  #sudo -v
+  # don't need sudo because lg is already the owner of the files
+  chmod +x precheck.sh install-phase-two.sh lib/*
+
   # to to exit immediately if a command returns a non-zero exit status, instead of continuing to execute the rest of the script
   set -euo pipefail 
 
