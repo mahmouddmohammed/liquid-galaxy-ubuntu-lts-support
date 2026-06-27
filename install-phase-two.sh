@@ -13,7 +13,8 @@ REPO_DIR="$LG_HOME/$GITHUB_REPO_NAME"
 
 exec > >(tee -a "$LOGFILE") 2>&1  # for logging
 echo "[Phase 2] Starting...."
- 
+
+export DEBIAN_FRONTEND=noninteractive # this script runs as systemd service (background process), there is no stdin for interactive
 # =============================================================================
 # Verify display setup 
 # =============================================================================
@@ -50,8 +51,10 @@ ln -sf "$GOOGLE_EARTH_DIR" "$LG_HOME/earth/builds/latest"
  
 # LC_NUMERIC fix into Google Earth launcher to ensure decimal points work correctly in non-US locales
 awk '/LD_LIBRARY_PATH/{print "export LC_NUMERIC=en_US.UTF-8"}1' \
-    "$LG_HOME/earth/builds/latest/googleearth" | \
-    tee "$LG_HOME/earth/builds/latest/googleearth" > /dev/null
+    "$LG_HOME/earth/builds/latest/googleearth" \
+    > /tmp/googleearth.tmp
+mv /tmp/googleearth.tmp "$LG_HOME/earth/builds/latest/googleearth"
+chmod +x "$LG_HOME/earth/builds/latest/googleearth"
 
 # Configure slave KML files
 if [ "$IS_MASTER" = "false" ]; then
@@ -218,17 +221,17 @@ echo " Writing personavars.txt..."
 cat > "$LG_HOME/personavars.txt" << EOF
 DHCP_LG_FRAMES="${LG_FRAMES}"
 DHCP_LG_FRAMES_MAX=${TOTAL_MACHINES}
- 
-FRAME_NO=$(cat $LG_HOME/frame 2>/dev/null)
-DHCP_LG_SCREEN="$(( ${FRAME_NO} + 1 ))"
+
+FRAME_NO=\$(cat \$LG_HOME/frame 2>/dev/null)
+DHCP_LG_SCREEN="\$(( \${FRAME_NO:-0} + 1 ))"
 DHCP_LG_SCREEN_COUNT=1
 DHCP_OCTET=${OCTET}
 DHCP_LG_PHPIFACE="http://lg1:81/"
- 
+
 DHCP_EARTH_PORT=45678
 DHCP_EARTH_BUILD="latest"
 DHCP_EARTH_QUERY="/tmp/query.txt"
- 
+
 DHCP_MPLAYER_PORT=45680
 EOF
 chown lg:lg "$LG_HOME/personavars.txt"
@@ -294,8 +297,7 @@ chmod 666 /dev/uinput 2>/dev/null || true
 
 if [ "$IS_MASTER" = "true" ]; then
     echo " Installing web interface (master only)..."
-    apt install -y php php-cgi libapache2-mod-php apache2
- 
+
     rm -f /var/www/html/index.html
     cp -r "$REPO_DIR/php-interface/." /var/www/html/
     #chown -R lg:lg /var/www/html/
