@@ -245,7 +245,7 @@ chown lg:lg "$LG_HOME/personavars.txt"
 
 echo " Configuring SSH..."
 
-su - lg -c "$REPO_DIR/lib/ssh.sh"
+bash "$REPO_DIR/lib/ssh.sh"
  
 # =============================================================================
 # Galaxy systemd service 

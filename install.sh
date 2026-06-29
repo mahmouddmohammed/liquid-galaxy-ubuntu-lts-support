@@ -273,7 +273,7 @@ GOOGLE_EARTH_DIR=$GOOGLE_EARTH_DIR
 NETWORK_INTERFACE=${NETWORK_INTERFACE:-}
 NETWORK_INTERFACE_MAC=${NETWORK_INTERFACE_MAC:-}
 EOF
-  sudo chmod 600 "$STATE_FILE"
+  sudo chmod 644 "$STATE_FILE"
 
 
   # Register as systemd one-shot that runs after display manager starts
