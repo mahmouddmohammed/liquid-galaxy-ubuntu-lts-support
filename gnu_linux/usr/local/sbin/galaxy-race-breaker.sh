@@ -16,7 +16,7 @@ while [ "$ready" = "no" ] && [ $timeout -le 180 ]; do
     
     if [ -n "$( pgrep -f 'sbin/squid' )" ] && \
        ( wget -q -t 1 -T 6 -O /dev/null --header='Host: www.endpoint.com' \
-         "http://www.endpoint.com/robots.txt" ); then
+         "http://127.0.0.1/robots.txt" ); then
 
         logger -p local3.info "race breaker: squid-ok"
         touch /run/galaxy-squid-ok
@@ -33,9 +33,9 @@ while [ "$ready" = "no" ] && [ $timeout -le 180 ]; do
     fi
 
     if [ -f /home/lg/personavars.txt ]; then
-        OCTET="$( awk -F '=' '/OCTET/ { print $NF }' /home/lg/personavars.txt )"
+        OCTET="$( awk -F '=' '/^DHCP_OCTET/ { print $NF }' /home/lg/personavars.txt )"
         
-        if ip addr show | grep -qE "inet [0-9]+\.[0-9]+\.[0-9]+\.${OCTET}/"; then
+        if ip addr show | grep -qE "inet [0-9]+\.[0-9]+\.${OCTET}\.[0-9]+/"; then
             logger -p local3.info "race breaker: persona-ok"
             touch /run/galaxy-persona-ok
         else
@@ -46,9 +46,10 @@ while [ "$ready" = "no" ] && [ $timeout -le 180 ]; do
         fi
     else
         logger -p local3.info "race breaker: personavars.txt missing, skipping persona check"
-        timeout=$((${timeout}+${timeoutsleep}))
-        sleep ${timeoutsleep}
-        continue
+        ready=yes
+        logger -p local3.info "race breaker: galaxy-ok (persona check skipped)"
+        touch /run/galaxy-ok
+        break
     fi
 
     ready=yes
