@@ -336,11 +336,11 @@ fi
 # =============================================================================
 echo " Cleaning up..."
 apt autoremove -y
-rm -f /etc/lg-install-state.env
+#rm -f /etc/lg-install-state.env
  
 # Self-destruct this service so it never runs again
-systemctl disable lg-install-phase2.service
-rm -f /etc/systemd/system/lg-install-phase2.service
+#systemctl disable lg-install-phase2.service
+#rm -f /etc/systemd/system/lg-install-phase2.service
 systemctl daemon-reload
  
 echo "[Phase 2] Installation complete"

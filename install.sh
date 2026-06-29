@@ -244,7 +244,28 @@ EOF
   chown -R lg:lg $LG_HOME/.config/gtk-4.0
 
   # run installation phase two automatically after reboot
-  register_phase2
+  #register_phase2
+
+  # Save all variables needed by phase 2 to a state file
+  STATE_FILE="/etc/lg-install-state.env"  
+  sudo tee "$STATE_FILE" > /dev/null << EOF
+IS_MASTER=$IS_MASTER
+MASTER_IP=$MASTER_IP
+MASTER_PASSWORD=$MASTER_PASSWORD
+USER_USERNAME=$USER_USERNAME
+USER_HOME_DIR=$USER_HOME_DIR
+MACHINE_ID=$MACHINE_ID
+MACHINE_NAME=$MACHINE_NAME
+TOTAL_MACHINES=$TOTAL_MACHINES
+LG_FRAMES="${LG_FRAMES}"
+OCTET=$OCTET
+GITHUB_REPO_NAME=$GITHUB_REPO_NAME
+GITHUB_REPO_URL=$GITHUB_REPO_URL
+GOOGLE_EARTH_DIR=$GOOGLE_EARTH_DIR
+NETWORK_INTERFACE=${NETWORK_INTERFACE:-}
+NETWORK_INTERFACE_MAC=${NETWORK_INTERFACE_MAC:-}
+EOF
+  sudo chmod 600 "$STATE_FILE"
 
   echo ">>> Display setup DONE. Rebooting in 5 seconds..."
   sleep 5
@@ -307,17 +328,17 @@ EOF
 main(){
 
   # clone the repo, if there is already the dir I will clone again because I don't know it's corrupted or not without checking the hash so i simply overwrite
-  cd ~ 
-  rm -rf "$GITHUB_REPO_NAME" || true
-  git clone "$GITHUB_REPO_URL"
-  cd "$GITHUB_REPO_NAME"
+  #cd ~ 
+  #rm -rf "$GITHUB_REPO_NAME" || true
+  #git clone "$GITHUB_REPO_URL"
+  cd ~/"$GITHUB_REPO_NAME"
 
   #sudo -v
   # don't need sudo because lg is already the owner of the files
   chmod +x precheck.sh install-phase-two.sh lib/*
 
   # to to exit immediately if a command returns a non-zero exit status, instead of continuing to execute the rest of the script
-  set -euo pipefail 
+  #set -euo pipefail 
 
   # first check it's compatibile or not 
   bash precheck.sh

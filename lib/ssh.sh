@@ -4,7 +4,7 @@
 # Runs as the calling user (NOT root)
 # Requires sudo for system file operations
 
-source /etc/lg-install-state.env
+sudo source /etc/lg-install-state.env
 LG_USER="lg"
 LG_HOME="/home/lg"
 
