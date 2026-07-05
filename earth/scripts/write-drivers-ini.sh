@@ -43,9 +43,9 @@ if [[ -n "${SCREEN_NO}" ]]; then
         let "YAW -= $( echo $YAW_AMOUNT '*' $SCREEN_NO | bc -l )"
     fi  
 fi
-MYIPALIAS="$( awk '/^ifconfig/ {print $3}' /etc/network/if-up.d/*-lg_alias )"
-VSYNCCHOP="${MYIPALIAS%.*}"
-VSYNCHOST="10.42.${VSYNCCHOP##*.}.255"
+
+source /home/lg/etc/shell.conf
+VSYNCHOST="10.42.${LG_OCTET}.255"
 VSYNCPORT="$EARTH_PORT"
 
 # Adjust ViewSync packet destination if using a ViewSync relay

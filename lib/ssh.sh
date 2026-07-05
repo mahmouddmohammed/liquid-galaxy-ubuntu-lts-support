@@ -13,9 +13,28 @@ configure_ssh() {
         echo ">>> Master: generating SSH keys..."
 
         
-        sudo -u "$LG_USER" bash "$LG_HOME/tools/clean-ssh.sh"
+        # bash "$LG_HOME/tools/clean-ssh.sh"
+	sudo -H -u "$LG_USER" bash "$LG_HOME/tools/clean-ssh.sh"
+        
+	# write client config `ssh lg@lgN` picks up lg-id_rsa
+	tee "$LG_HOME/.ssh/config" > /dev/null << 'EOF'
+Host lg1 lg2 lg3 lg4 lg5 lg6 lg7 lg8 lgX localhost
+    IdentityFile ~/.ssh/lg-id_rsa
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+EOF
+    	chown "$LG_USER:$LG_USER" "$LG_HOME/.ssh/config"
+    	chmod 600 "$LG_HOME/.ssh/config"
 
-        # Prepare SSH files zip for slave nodes to download
+    	tee /root/.ssh/config > /dev/null << 'EOF'
+Host lg1 lg2 lg3 lg4 lg5 lg6 lg7 lg8 lgX localhost
+    IdentityFile ~/.ssh/lg-id_rsa
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+EOF
+    	chmod 600 /root/.ssh/config
+
+	# Prepare SSH files zip for slave nodes to download
         rm -rf /tmp/ssh-files
         mkdir -p /tmp/ssh-files/etc /tmp/ssh-files/root /tmp/ssh-files/user
 

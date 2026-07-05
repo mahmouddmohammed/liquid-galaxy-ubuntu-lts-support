@@ -8,8 +8,16 @@ set -euo pipefail
 sudo apt install -y ca-certificates curl gpg xdg-utils
 
 # 2. GPG key 
-curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
-  | sudo gpg --dearmor --yes -o /usr/share/keyrings/google-earth.gpg
+# curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+#  | sudo gpg --dearmor --yes -o /usr/share/keyrings/google-earth.gpg
+
+for i in 1 2 3 4 5; do
+    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub -o /tmp/google-earth-key.pub && break
+    echo "curl failed (attempt $i/5), retrying in 5s..."
+    sleep 5
+done
+[ -s /tmp/google-earth-key.pub ] || { echo "FATAL: could not download Google signing key after 5 attempts"; exit 1; }
+sudo gpg --dearmor --yes -o /usr/share/keyrings/google-earth.gpg < /tmp/google-earth-key.pub
 
 # 3. APT source in DEB822 format
 sudo tee /etc/apt/sources.list.d/google-earth.sources > /dev/null <<EOF

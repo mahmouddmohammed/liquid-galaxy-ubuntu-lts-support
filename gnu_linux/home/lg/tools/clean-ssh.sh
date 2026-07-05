@@ -41,7 +41,7 @@ fi
 
 if [[ ! -r $LG_PUBKEY ]] || [[ "$regenyn" = "y" ]]; then
     echo "generating new keypairs"
-    ssh-keygen -t rsa -b 4096 -C "Liquid Galaxy" -f $LG_KEY
+    ssh-keygen -t rsa -b 4096 -C "Liquid Galaxy" -f $LG_KEY -N ""
     # re-generate host keys to pave the way
     sudo rm -vf /etc/ssh/ssh_host_*
     sudo ssh-keygen -A

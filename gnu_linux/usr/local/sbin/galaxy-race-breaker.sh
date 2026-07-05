@@ -14,23 +14,23 @@ while [ "$ready" = "no" ] && [ $timeout -le 180 ]; do
     timeoutsleep=1
 
     
-    if [ -n "$( pgrep -f 'sbin/squid' )" ] && \
-       ( wget -q -t 1 -T 6 -O /dev/null --header='Host: www.endpoint.com' \
-         "http://127.0.0.1/robots.txt" ); then
-
-        logger -p local3.info "race breaker: squid-ok"
-        touch /run/galaxy-squid-ok
-
-    else
-        if [ $timeout -ge 30 ]; then
-            logger -p local3.info "race breaker: squid-restart"
-            systemctl restart squid &
-            timeoutsleep=12
-        fi
-        timeout=$((${timeout}+${timeoutsleep}))
-        sleep ${timeoutsleep}
-        continue
-    fi
+    # if [ -n "$( pgrep -f 'sbin/squid' )" ] && \
+    #    ( wget -q -t 1 -T 6 -O /dev/null --header='Host: www.endpoint.com' \
+    #      "http://127.0.0.1/robots.txt" ); then
+# 
+    #     logger -p local3.info "race breaker: squid-ok"
+    #     touch /run/galaxy-squid-ok
+# 
+    # else
+    #     if [ $timeout -ge 30 ]; then
+    #         logger -p local3.info "race breaker: squid-restart"
+    #         systemctl restart squid &
+    #         timeoutsleep=12
+    #     fi
+    #     timeout=$((${timeout}+${timeoutsleep}))
+    #     sleep ${timeoutsleep}
+    #     continue
+    # fi
 
     if [ -f /home/lg/personavars.txt ]; then
         OCTET="$( awk -F '=' '/^DHCP_OCTET/ { print $NF }' /home/lg/personavars.txt )"
