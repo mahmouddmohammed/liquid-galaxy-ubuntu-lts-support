@@ -53,8 +53,8 @@ LG_FRAMES="lg3 lg1 lg2"
 OCTET="42"
 SCREEN_ORIENTATION="V"
 
-GITHUB_REPO_NAME="ubuntu-lts-support-gsoc2026"
-GITHUB_REPO_URL="https://github.com/LiquidGalaxyLAB/ubuntu-lts-support-gsoc2026"
+GITHUB_REPO_NAME="liquid-galaxy-ubuntu-lts-support"
+GITHUB_REPO_URL="https://github.com/mahmouddmohammed/liquid-galaxy-ubuntu-lts-support"
 
 GOOGLE_EARTH_DIR="/opt/google/earth/pro/"
 
