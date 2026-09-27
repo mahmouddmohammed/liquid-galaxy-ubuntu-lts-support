@@ -1,0 +1,28 @@
+# galaxy.service - Liquid Galaxy startup race breaker
+#
+# Systemd unit replacing /etc/init/galaxy.conf (Upstart).
+# Checks squid proxy reachability and network personality (OCTET match)
+# before emitting galaxy-ok, which display-manager.service depends on.
+#
+# Enable:   sudo systemctl enable galaxy.service
+
+[Unit]
+Description=Liquid Galaxy race breaker
+After=network-online.target dbus.service rsyslog.service
+Wants=network-online.target
+# galaxy.service must succeed before the display manager starts
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=181
+StandardOutput=journal
+StandardError=journal
+
+# task + pre-start script block
+ExecStart=/usr/local/sbin/galaxy-race-breaker.sh
+
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

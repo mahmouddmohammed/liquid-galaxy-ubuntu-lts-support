@@ -23,7 +23,7 @@ echo "=== Running ShellCheck on all .sh files ==="
 shellcheck \
   --severity="$SEVERITY" \
   --exclude=SC1091 \
-  $(find . -name "*.sh" -not -path "./.git/*")
+  $(find .. -name "*.sh" -not -path "./.git/*")
 
 echo ""
 echo "ShellCheck passed."
