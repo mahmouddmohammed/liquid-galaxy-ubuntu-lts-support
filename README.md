@@ -110,7 +110,7 @@ ubuntu-lts-support-gsoc2026/
 </table>
 </div>
 
-Please, Check [Demo Video]()
+Please, Check [Demo Video](https://youtu.be/FQ3C5q1QJJU?t=2029)
 
 ---
 
@@ -141,7 +141,8 @@ Enter its machine id (`2`, `3`, …), the master's IP and password, and the **sa
 > [!IMPORTANT]
 > **Total machine count and octet must match exactly on every node** — a mismatch breaks frame ordering and cluster sync.
 
-📄 Full step-by-step guide: **[`docs/Installation-Guide.pdf`](docs/installation-guide.pdf)**
+📄 Full step-by-step guide: **[`docs/installation-guide.pdf`](docs/installation-guide.pdf)**
+
 ---
 
 ## 🛠️ Key Scripts
